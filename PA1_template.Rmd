@@ -27,8 +27,9 @@ variables included in this dataset are:
 The first thing to do is to load the packages that will be used in the analysis.
 
 ```{r}  
-library(plyr, w=FALSE)
-library(dplyr, w=FALSE)
+library(plyr, w=F)
+library(dplyr, w=F)
+library(lattice, w=F)
 ```
 
 
@@ -219,31 +220,16 @@ count(data_weekdays, DayWeek)
 First we need to take the average steps by interval for "weekend" and "weekday":
 
 ```{r}  
-
-weekend_interval <- data_weekdays %>% filter(DayWeek == "weekend") %>% 
-        ddply(.(interval), summarize, steps=mean(steps)) 
-head(weekend_interval)
-weekday_interval <- data_weekdays %>% filter(DayWeek == "weekday") %>% 
-        ddply(.(interval), summarize, steps=mean(steps)) 
-head(weekday_interval)
+weekdays_interval <- ddply(data_weekdays, interval ~ DayWeek, summarize, Steps = mean(steps))
+head(weekdays_interval)
 ```
 
-Then, we can create the painel plot:
+Then, we can create the painel plot with the function "xyplot()" from the 
+"Lattice" package:
 
 ```{r panel_plot}
-par(mfrow=c(2,1))
-par(oma=c(2,2,2,2))
-par(mar=c(0,4,2,2))
-with(weekend_interval, plot(interval, steps, xaxt = "n", type="l", xlab=NA, 
-                            ylab=NA, ylim=c(0,250),cex.axis=0.75, col="blue"))
-mtext("weekend", side=3, line=-1, col="red")
-par(mar=c(2,4,0,2))
-with(weekday_interval, plot(interval, steps, xlab=NA, ylab=NA, type="l", 
-                            ylim=c(0,250), cex.axis=0.75, col="blue"))
-mtext("weekday", side=3, line=-1, col="red")
-mtext("Average Number of Steps During the Day", side=3, outer=T, cex=1.25, font=2)
-mtext("Interval", side=1, outer=T)
-mtext("Number of Steps", side=2, outer=T)
+xyplot(Steps ~ interval | DayWeek, data = weekdays_interval, layout = c(1,2), 
+       type = "l", main = "Average number of steps during the day", )
 ```
 
 

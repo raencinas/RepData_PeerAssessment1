@@ -28,8 +28,13 @@ The first thing to do is to load the packages that will be used in the analysis.
 
 
 ```r
-library(plyr, w=FALSE)
-library(dplyr, w=FALSE)
+library(plyr, w=F)
+library(dplyr, w=F)
+library(lattice, w=F)
+```
+
+```
+## Warning: package 'lattice' was built under R version 3.1.3
 ```
 
 
@@ -362,54 +367,27 @@ First we need to take the average steps by interval for "weekend" and "weekday":
 
 
 ```r
-weekend_interval <- data_weekdays %>% filter(DayWeek == "weekend") %>% 
-        ddply(.(interval), summarize, steps=mean(steps)) 
-head(weekend_interval)
+weekdays_interval <- ddply(data_weekdays, interval ~ DayWeek, summarize, Steps = mean(steps))
+head(weekdays_interval)
 ```
 
 ```
-##   interval       steps
-## 1        0 0.214622642
-## 2        5 0.042452830
-## 3       10 0.016509434
-## 4       15 0.018867925
-## 5       20 0.009433962
-## 6       25 3.511792453
+##   interval DayWeek      Steps
+## 1        0 weekday 2.25115304
+## 2        0 weekend 0.21462264
+## 3        5 weekday 0.44528302
+## 4        5 weekend 0.04245283
+## 5       10 weekday 0.17316562
+## 6       10 weekend 0.01650943
 ```
 
-```r
-weekday_interval <- data_weekdays %>% filter(DayWeek == "weekday") %>% 
-        ddply(.(interval), summarize, steps=mean(steps)) 
-head(weekday_interval)
-```
-
-```
-##   interval      steps
-## 1        0 2.25115304
-## 2        5 0.44528302
-## 3       10 0.17316562
-## 4       15 0.19790356
-## 5       20 0.09895178
-## 6       25 1.59035639
-```
-
-Then, we can create the painel plot:
+Then, we can create the painel plot with the function "xyplot()" from the 
+"Lattice" package:
 
 
 ```r
-par(mfrow=c(2,1))
-par(oma=c(2,2,2,2))
-par(mar=c(0,4,2,2))
-with(weekend_interval, plot(interval, steps, xaxt = "n", type="l", xlab=NA, 
-                            ylab=NA, ylim=c(0,250),cex.axis=0.75, col="blue"))
-mtext("weekend", side=3, line=-1, col="red")
-par(mar=c(2,4,0,2))
-with(weekday_interval, plot(interval, steps, xlab=NA, ylab=NA, type="l", 
-                            ylim=c(0,250), cex.axis=0.75, col="blue"))
-mtext("weekday", side=3, line=-1, col="red")
-mtext("Average Number of Steps During the Day", side=3, outer=T, cex=1.25, font=2)
-mtext("Interval", side=1, outer=T)
-mtext("Number of Steps", side=2, outer=T)
+xyplot(Steps ~ interval | DayWeek, data = weekdays_interval, layout = c(1,2), 
+       type = "l", main = "Average number of steps during the day", )
 ```
 
 ![plot of chunk panel_plot](figure/panel_plot-1.png) 
